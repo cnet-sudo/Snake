@@ -91,7 +91,7 @@ void show_map()
     if (xq == 0) { xq = dx(rnd); yq = dy(rnd); }
     // рисуем яблоко
     move(yq,xq);
-    attrset(A_DIM | COLOR_PAIR(2));
+    attrset(A_BOLD | COLOR_PAIR(2));
     addch('@');
     refresh();    
 }
@@ -109,7 +109,7 @@ int main()
     start_color();
     // режимы цветов
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_RED, COLOR_BLUE);
+    init_pair(2, COLOR_MAGENTA, COLOR_BLUE);
     init_pair(3, COLOR_GREEN, COLOR_BLUE);
     //цвет фона
     bkgd(COLOR_PAIR(1));
