@@ -56,6 +56,7 @@ void move_snake()
     }
     else
     {
+        
         addch('$');
         // обновляем координаты змеи
         if (!vx.empty()) 
@@ -101,7 +102,7 @@ int main()
 {
     system("chcp 1251");
     // инициализируем экран curses
-    initscr();   
+    initscr();                   
     // прячим курсор
     curs_set(0);
     // запускаем цветной режим
@@ -133,7 +134,7 @@ int main()
     }
     }
     // выключаем экран curses
-    endwin(); 
+    endwin();                    
     return 0;
 }
 
