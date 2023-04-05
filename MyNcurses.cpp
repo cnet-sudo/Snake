@@ -37,8 +37,7 @@ void move_snake()
             move(vy[i],vx[i]);
             addch('#');
         }
-    
-    }
+     }
     // рисуем голову змеи
     x += stepx; 
     y += stepy;
@@ -48,15 +47,18 @@ void move_snake()
     if (s == '!' || s=='#') exit(0);
     if (s == '@') 
     {
-        // новые координаты яблока
-        xq = dx(rnd); yq = dy(rnd); 
         // добавляем хвост змеи
         vx.push_back(x); vy.push_back(y);
-        addch('$');
+        addch('$'); 
+        do {
+        // новые координаты яблока
+        xq = dx(rnd); yq = dy(rnd); 
+        move(yq, xq);
+        auto s = static_cast<char>(winch(stdscr));
+        } while (s == '#');
     }
     else
     {
-        
         addch('$');
         // обновляем координаты змеи
         if (!vx.empty()) 
@@ -66,8 +68,7 @@ void move_snake()
         vy.erase(vy.begin());
         }
     }
-    refresh();
-    
+    refresh(); 
 };
 
 void show_map() 
