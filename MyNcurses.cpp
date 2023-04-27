@@ -1,46 +1,82 @@
-﻿
+﻿#include <iostream>
 #include <chrono>
 #include <random>
 #include <vector>
-
+#include <string>
 #include "curses.h"
 
 using namespace std;
 using namespace std::chrono;
 
-struct vector2di{
+bool game_exit = false;
 
-    int x=0;
-    int y=0;
+struct vector2di {
+
+    int x = 0;
+
+    int y = 0;
 };
 
-void move_snake(vector2di &snake_head, const vector2di & vector_step,vector<vector2di> & snake_tail, 
-    vector2di& apple,vector2di rnd){
+void move_snake(vector2di & snake_head, vector2di & vector_step,vector<vector2di> & snake_tail, 
+    vector2di & apple, vector2di rnd, int & eaten_apples) {
 
     // устанавливаем цвет змеи
     attrset(A_BOLD | COLOR_PAIR(3));
 
     // рисуем хвост змеи если он есть
-    if (!snake_tail.empty()){
+    if (!snake_tail.empty()) {
 
-        for (auto const & mov : snake_tail){
+        for (auto const & mov : snake_tail) {
 
-            move(mov.y, mov.x);
+            move(mov.y, mov.x); 
+
             addch('#');
         }
      }
     // изменяем координаты головы змеи
     snake_head.x += vector_step.x;
+
     snake_head.y += vector_step.y;
+
     move(snake_head.y, snake_head.x);
+
     // проверяем символ в установленных координатах курсора
     auto s = static_cast<char>(winch(stdscr));
-    if (s == '!' || s=='#') exit(0);
-    // змея съедает яблоко
-    if (s == '@'){
 
+    if (s == '%' || s == '#') { 
+        
+        // устанавливаем цвет надписи
+        attrset(A_BOLD | COLOR_PAIR(4));
+        move(13, 55);
+        printw("Конец игры"); 
+        move(14, 42);
+        printw("Выход - < q > Начать заново - < n >");
+        do {
+        
+        if (getch() == 'q') {
+            
+            game_exit = true;
+            return;
+        }
+        if (getch() == 'n')
+        {
+            // начальные координаты головы
+            snake_head={ 10,10 };
+            // направление и шаг перемещения
+            vector_step = { 1,0 };
+            snake_tail.clear();
+            apple = { 15,15 };
+            eaten_apples = 0;
+            return;
+        }
+        } while (true);
+    }
+
+    // змея съедает яблоко
+    if (s == '@') {
+        eaten_apples++;
         // добавляем хвост змеи
-        snake_tail.push_back({snake_head.x, snake_head.y});
+        snake_tail.push_back( {snake_head.x, snake_head.y});
         // рисуем голову змеи
         addch('$'); 
 
@@ -48,61 +84,64 @@ void move_snake(vector2di &snake_head, const vector2di & vector_step,vector<vect
 
         // новые координаты яблока
         apple.x = rnd.x; apple.y = rnd.y;
+
         move(apple.y, apple.x);
-        s = static_cast<char>(winch(stdscr));
+
+        auto s = static_cast<char>(winch(stdscr));
         // повторяем пока координаты яблока совпадают с хвостом змеи
         } while (s == '#'|| s == '$');
     }
-    else{
+    else {
 
         // рисуем голову змеи
         addch('$');
         // обновляем координаты хвоста змеи
-        if (!snake_tail.empty()){
+        if (!snake_tail.empty()) {
 
-            snake_tail.push_back({ snake_head.x, snake_head.y });
-            snake_tail.erase(snake_tail.begin());       
+        snake_tail.erase(snake_tail.begin()); 
+            
+        snake_tail.push_back( { snake_head.x, snake_head.y });
+
+                  
         }
     }
-    refresh(); 
-};
+  };
 
-void show_map(vector2di & apple, vector2di rnd){
+void show_map(const vector2di & apple, const int& eaten_apples) {
 
     // очистка экрана
     clear();
     // перемещение курсора
-    move(1,50);
+    move(2, 55);
+
     attrset(A_DIM | COLOR_PAIR(1));
-    printw("Змейка\n"); 
 
+    printw("Змейка"); 
+    printw("\t\t\tколичество съеденых яблок < ");
+    string s_eaten_apples = to_string(eaten_apples);
+    printw(s_eaten_apples.c_str());
+    printw(" >");
     // рисуем игровое поле 
-    for (int i = 0; i < 25; i++){   
+    for (int y = 4; y < 28; y++) {   
         
-        move(i+3, 5);
+        for (int x = 5; x < 112; x++) {
 
-        for (int j = 0; j < 100; j++){
-
-            if (i == 0 || i == 24) addch('!');
-            else 
-                if (j==0 || j==99) addch('!');
-                else addch(' ');
+            if (y == 4 || y == 27 || x == 5 || x == 111) {
+                
+                move(y, x); addch('%');
+            }
+            
         }
 
-        addch('\n');
-    }
-    if (apple.x == 0){ 
-        
-        apple.x = rnd.x; apple.y = rnd.y;
     }
     // рисуем яблоко
     move(apple.y, apple.x);
+
     attrset(A_BOLD | COLOR_PAIR(2));
+
     addch('@');
-    refresh();    
+
 }
-
-
 
 int main(){
 
@@ -118,14 +157,15 @@ int main(){
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
     init_pair(2, COLOR_MAGENTA, COLOR_BLUE);
     init_pair(3, COLOR_GREEN, COLOR_BLUE);
+    init_pair(4, COLOR_RED, COLOR_BLUE);
     //цвет фона
     bkgd(COLOR_PAIR(1));
     // начальные координаты головы
-    vector2di snake_head{10,10};
+    vector2di snake_head  {10,10};
     // направление и шаг перемещения
-    vector2di vector_step{1,0};
+    vector2di vector_step  {1,0};
     // координаты яблока
-    vector2di apple;
+    vector2di apple{15,15};
     vector2di rnd_apple;
     // координаты хвоста змеи 
     vector<vector2di> snake_tail;
@@ -137,25 +177,28 @@ int main(){
     uniform_int_distribution<int> apple_x(10, 97);
     uniform_int_distribution<int> apple_y(5, 22);
     int pause = 100;
-
+    int eaten_apples = 0; 
+    // разрешаем использовать специальные клавиши в нашем случае стрелки    
+    keypad(stdscr, true);
+    // выключает отображение нажатых клавишь на экране
+    noecho();
     // игровой цикл
-    while (true){
+    while (!game_exit) {
 
     rnd_apple.x = apple_x(rnd);
     rnd_apple.y = apple_y(rnd);
     // рисуем карту
-    show_map(apple, rnd_apple);
+    show_map(apple, eaten_apples);
     // перемещаем змейку
-    move_snake(snake_head, vector_step, snake_tail, apple,rnd_apple);
+    move_snake(snake_head, vector_step, snake_tail, apple, rnd_apple, eaten_apples);
     // пауза
     timeout(pause);
-    // разрешаем использовать специальные клавиши в нашем случае стрелки    
-    keypad(stdscr, true);
+   
     // проверка нажатой клавиши
-    switch (getch()){
+    switch (getch()) {
 
     case KEY_UP:
-        if (vector_step.y == 0){ 
+        if (vector_step.y == 0) { 
         
         vector_step.y = -1; 
         vector_step.x = 0; 
@@ -164,7 +207,7 @@ int main(){
         break;
 
     case KEY_DOWN:
-        if (vector_step.y == 0){ 
+        if (vector_step.y == 0) { 
             
             vector_step.y = 1; 
             vector_step.x = 0; 
@@ -172,7 +215,7 @@ int main(){
         break;
 
     case KEY_LEFT:  
-        if (vector_step.x == 0){ 
+        if (vector_step.x == 0) { 
             
             vector_step.x = -1; 
             vector_step.y = 0; 
@@ -180,22 +223,21 @@ int main(){
         break;
 
     case KEY_RIGHT:   
-        if (vector_step.x == 0){ 
+        if (vector_step.x == 0) { 
             
             vector_step.x = 1; 
             vector_step.y = 0; 
             pause = 100;} 
         break;
-
-    case 'q': 
-        // выключаем экран curses
-        endwin(); 
-        return 0; 
-
+    case 'q':
+        game_exit = true;
+        break;
     default:
         break;
     }
 
     }
+    endwin();
+    return 0;
 }
 
