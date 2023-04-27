@@ -1,7 +1,9 @@
-﻿#include "curses.h"
+﻿
 #include <chrono>
 #include <random>
 #include <vector>
+
+#include "curses.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -157,16 +159,16 @@ int main(){
         
         vector_step.y = -1; 
         vector_step.x = 0; 
-        pause = 200; 
+        pause = 170; 
         }
         break;
 
-    case KEY_DOWN: 
+    case KEY_DOWN:
         if (vector_step.y == 0){ 
             
             vector_step.y = 1; 
             vector_step.x = 0; 
-            pause = 200;} 
+            pause = 170;} 
         break;
 
     case KEY_LEFT:  
@@ -186,16 +188,14 @@ int main(){
         break;
 
     case 'q': 
+        // выключаем экран curses
         endwin(); 
-        return(0); 
+        return 0; 
 
     default:
         break;
     }
 
     }
-    // выключаем экран curses
-    endwin();                    
-    return 0;
 }
 
