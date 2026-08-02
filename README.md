@@ -1,5 +1,7 @@
 # Консольная змейка на PDCurses
 
+**Русский** | [English](README_EN.md)
+
 ![C++](https://img.shields.io/badge/C%2B%2B-console-00599C?logo=cplusplus)
 ![Library](https://img.shields.io/badge/library-PDCurses-4B8BBE)
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows)
